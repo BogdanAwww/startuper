@@ -1,20 +1,27 @@
-import { Startuper, StartuperDocument } from './../schemas/startuper.schema';
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { startuperDto } from 'src/dto/startuper.dto';
+import { UsersService } from './../users/users.service';
+import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
+import { startuperDto } from '../users/dto/startuper.dto';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(Startuper.name)
-    private startuperModel: Model<StartuperDocument>,
+    private userService: UsersService,
+    private jwtService: JwtService,
   ) {}
 
-  async registrationStartuper(dto: startuperDto): Promise<Startuper> {
-    const startuper = await this.startuperModel.create(dto);
+  async registrationStartuper(dto: startuperDto) {
+    let startuper = await this.userService.getStartuperByEmail(dto);
+    if (startuper) {
+      throw new HttpException(
+        'User with this email already exist',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    startuper = await this.userService.createStartuper(dto);
     return startuper;
   }
 
-  async registrationInvestor() {}
+  // async registrationInvestor() {}
 }

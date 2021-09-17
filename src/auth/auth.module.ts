@@ -1,19 +1,20 @@
-import { Startuper, StartuperSchema } from './../schemas/startuper.schema';
-import { MongooseModule } from '@nestjs/mongoose';
+import { UsersModule } from './../users/users.module';
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      {
-        name: Startuper.name,
-        schema: StartuperSchema,
-      },
-    ]),
-  ],
   controllers: [AuthController],
   providers: [AuthService],
+  imports: [
+    UsersModule,
+    JwtModule.register({
+      privateKey: process.env.PRIVATE_KEY || 'SECRET',
+      signOptions: {
+        expiresIn: '24h',
+      },
+    }),
+  ],
 })
 export class AuthModule {}
