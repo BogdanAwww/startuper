@@ -1,28 +1,29 @@
+import { loginDto } from './../auth/dto/login.dto';
+import { User, UserDocument } from './schema/user.schema';
+import { userDto } from './dto/user.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { investorDto } from './dto/investor.dto';
-import { startuperDto } from './dto/startuper.dto';
-import { Startuper, StartuperDocument } from './schema/startuper.schema';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(Startuper.name)
-    private startuperModel: Model<StartuperDocument>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
   ) {}
 
-  async createStartuper(dto: startuperDto) {
-    const startuper = await this.startuperModel.create(dto);
-    return startuper;
+  async createUser(dto: userDto) {
+    const user = await this.userModel.create(dto);
+    return user;
   }
 
-  async createInvestor(dto: investorDto) {}
+  async getUserByEmail(dto: userDto) {
+    const user = await this.userModel.findOne({ email: dto.email });
+    return user;
+  }
 
-  async getAll() {}
-
-  async getStartuperByEmail(dto: startuperDto) {
-    const startuper = await this.startuperModel.findOne({ email: dto.email });
-    return startuper;
+  async getUser(dto: loginDto) {
+    const user = await this.userModel.findOne(dto);
+    return user;
   }
 }

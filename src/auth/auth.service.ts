@@ -1,8 +1,9 @@
+import { loginDto } from './dto/login.dto';
+import { userDto } from './../users/dto/user.dto';
 import { UsersService } from './../users/users.service';
 import { HttpException, Injectable, HttpStatus } from '@nestjs/common';
-import { startuperDto } from '../users/dto/startuper.dto';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
+import * as bcryptjs from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -11,17 +12,36 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async registrationStartuper(dto: startuperDto) {
-    let startuper = await this.userService.getStartuperByEmail(dto);
-    if (startuper) {
+  async createUser(dto: userDto) {
+    const candidate = await this.userService.getUserByEmail(dto);
+    if (candidate) {
       throw new HttpException(
         'User with this email already exist',
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.CONFLICT,
       );
     }
-    startuper = await this.userService.createStartuper(dto);
-    return startuper;
+    const user = await this.userService.createUser(dto);
+    return user;
   }
 
-  // async registrationInvestor() {}
+  async login(dto: loginDto) {
+    const user = await this.userService.getUser(dto);
+    if (!user) {
+      throw new HttpException(
+        'Password or email incorrect',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+    const payload = {
+      username: user.username,
+      surname: user.surname,
+      _id: user._id,
+    };
+    return {
+      username: user.username,
+      surname: user.surname,
+      email: user.email,
+      token: this.jwtService.sign(payload),
+    };
+  }
 }

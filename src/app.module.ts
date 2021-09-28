@@ -10,7 +10,7 @@ import { UsersModule } from './users/users.module';
       envFilePath: '.env',
     }),
     MongooseModule.forRoot(process.env.DATABASE_URL, {
-      dbName: 'startupers',
+      dbName: process.env.DATABASE_NAME,
     }),
     AuthModule,
     UsersModule,
